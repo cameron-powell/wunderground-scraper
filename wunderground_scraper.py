@@ -21,44 +21,59 @@ NOTE: This assumes you are running within an activated virtual environment
 and have the project's requirements already installed.  See the project README
 for instructions on setting that up.
 """
+import time
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 
 
-def get_url(location):
+def get_url(search_location):
     """ This method takes in a location string and, using selenium, opens
     a Firefox browser, executes javascript to insert the location
     provided into the search box at https://www.wunderground.com/history,
     clicks the search button, and returns the url once the page
     changes.
+    input: location (string)
+    output: history url (string) for that location
     """
-    import time
+    # Create a driver and go to wunderground's history page
     driver = webdriver.Firefox()
     driver.get('https://www.wunderground.com/history')
     time.sleep(5)
+
+    # Inject JS to attempt to stop the page from loading (ads)
+    # Set the histSearch element to the location value provided
+    # Loop through the input tags to find the Submit button
     driver.execute_script('''
     window.stop();
-    document.getElementById("histSearch").value = "Atlanta, GA";
+    document.getElementById("histSearch").value = "%s";
     var tags = document.getElementsByTagName("input");
     for(var i=0; i<tags.length; i++) {
       if(tags[i].value == "Submit") {
         tags[i].click();
       }
-    }''')
+    }''' % search_location)
     time.sleep(5)
+
+    # Get the results page URL from the browser then quit the browser
     url = driver.current_url
     driver.quit()
     return url
 
 
-def scrape_weather_data(url):
-    """ Docstring """
+def scrape_weather_data(results_url):
+    """ This method takes in a url pointing to the results page for the
+     users search, grabs the html, parses it to get the data of interest,
+     and returns it as a string formatted as a JSON object.
+     Inputs: results_url -> string url pointing to the results page
+     Outputs: temp_json -> a string of all the temperature data formatted
+         as a json object.
+     """
     # Get the html from the page using requests
-    response = requests.get(url)
+    response = requests.get(results_url)
     if response.status_code != 200:
         return '{"error": "Received %s status code for url: ' \
-               '%s"}' % (response.status_code, url)
+               '%s"}' % (response.status_code, results_url)
 
     # Use beautiful soup to navigate the html
     # to the rows in the history table
@@ -68,7 +83,7 @@ def scrape_weather_data(url):
     # with the table/id we want
     if history_table is None:
         return '{"error": "Received a link which does not contain ' \
-               'the data we want.  Link received %s"}' % url
+               'the data we want.  Link received %s"}' % results_url
     history_table_rows = history_table.findAll('tr')
 
     # Parse the data from each row with information we care about,
@@ -119,8 +134,9 @@ if __name__ == '__main__':
     month = input('Month: ')
     day = input('Day: ')
     year = input('Year: ')
-    # Get the url for the location from wunderground
-    url = get_url(location)
+    # Get the results url for the location from wunderground
+    res_url = get_url(location)
     # Modify the url for the correct date and use that to get the data
-    data = scrape_weather_data(url)
+    data = scrape_weather_data(res_url)
+    # Print the JSON formatted string out for the user
     print(data)
