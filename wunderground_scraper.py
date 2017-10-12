@@ -2,9 +2,7 @@
 
 The purpose of this module is to:
 1) Provide methods to get location and date inputs from the user
-2) Provide methods for inserting those inputs into the wunderground history
-search
-3) Provide methods for scraping requested values off of the wunderground
+2) Provide methods for scraping requested values off of the wunderground
 results page
 4) Provide methods to convert those results into a JSON object and return them
 to the user
@@ -15,7 +13,7 @@ the following command:
 
 'python wunderground_scraper.py'
 
-This will execute all of the code defined with the if __name__ == '__main__'
+This will execute all of the code enclosed in the if __name__ == '__main__'
 block.
 NOTE: This assumes you are running within an activated virtual environment
 and have the project's requirements already installed.  See the project README
