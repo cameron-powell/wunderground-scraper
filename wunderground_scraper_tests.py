@@ -14,6 +14,7 @@ for instructions on setting that up.
 """
 import unittest
 import wunderground_scraper
+from bs4 import BeautifulSoup
 
 
 class TestWundergroundScraper(unittest.TestCase):
@@ -21,12 +22,17 @@ class TestWundergroundScraper(unittest.TestCase):
     wunderground_scraper.py module.
     """
 
-    def test_format_location(self):
-        """ This tests that the format location function strips whitespace off
-        of a provided location.
+    def test_get_url(self):
+        """ This tests the get_url method within wunderground_scraper.py
+        to ensure that, when given a valid location, it's able to retrieve
+        the correct url for that location.
         """
-        answer = wunderground_scraper.format_location('   Atlanta, Georgia')
-        self.assertEqual(answer, 'Atlanta, Georgia')
+        answer = wunderground_scraper.get_url('Atlanta, GA')
+        expected = 'https://www.wunderground.com/history/airport/KFTY' \
+                   '/2017/10/12/DailyHistory.html?' \
+                   'req_city=Atlanta&req_state=GA&req_statename=Georgia' \
+                   '&reqdb.zip=30301&reqdb.magic=1&reqdb.wmo=99999'
+        self.assertEqual(answer, expected)
 
     def test_scrape_weather_data(self):
         """ This tests to see if, when provided with a valid wunderground
@@ -72,6 +78,50 @@ class TestWundergroundScraper(unittest.TestCase):
                           'contain the data we want.  ' \
                           'Link received %s"}' % url
         self.assertEqual(answer, expected_answer)
+
+    def test_cell_to_json(self):
+        """ This function tests the cell to json function.  It creates a fake
+        table row to get cells from, and parses a cell into the format string
+        we expect.
+        """
+        row_html = '''<tr>
+        <td class="indent"><span>Mean Temperature</span></td>
+        <td>
+        <span class="wx-data"><span class="wx-value">76</span><span class="wx-unit"> °F</span></span>
+        </td>
+        <td>
+        <span class="wx-data"><span class="wx-value">64</span><span class="wx-unit"> °F</span></span>
+        </td>
+        <td> </td>
+        </tr>
+        '''
+        row = BeautifulSoup(row_html, 'html.parser')
+        cells = row.findAll('td')
+        answer = wunderground_scraper\
+            .cell_to_json('Actual Mean Temperature', cells[1], False)
+        expected = '"Actual Mean Temperature": "76°F"'
+        self.assertEqual(answer, expected)
+
+    def test_cell_to_json_comma(self):
+        """ This tests to make sure that cell_to_json is appending a comma
+        to the end of our json element string when requested. """
+        row_html = '''<tr>
+        <td class="indent"><span>Mean Temperature</span></td>
+        <td>
+        <span class="wx-data"><span class="wx-value">76</span><span class="wx-unit"> °F</span></span>
+        </td>
+        <td>
+        <span class="wx-data"><span class="wx-value">64</span><span class="wx-unit"> °F</span></span>
+        </td>
+        <td> </td>
+        </tr>
+        '''
+        row = BeautifulSoup(row_html, 'html.parser')
+        cells = row.findAll('td')
+        answer = wunderground_scraper\
+            .cell_to_json('Actual Mean Temperature', cells[1])
+        expected = '"Actual Mean Temperature": "76°F",'
+        self.assertEqual(answer, expected)
 
 
 if __name__ == '__main__':
