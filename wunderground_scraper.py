@@ -21,13 +21,35 @@ NOTE: This assumes you are running within an activated virtual environment
 and have the project's requirements already installed.  See the project README
 for instructions on setting that up.
 """
-from bs4 import BeautifulSoup
 import requests
+from bs4 import BeautifulSoup
+from selenium import webdriver
 
 
-def format_location(loc):
-    """ This function strips whitespace off the ends of location inputs. """
-    return loc.strip()
+def get_url(location):
+    """ This method takes in a location string and, using selenium, opens
+    a Firefox browser, executes javascript to insert the location
+    provided into the search box at https://www.wunderground.com/history,
+    clicks the search button, and returns the url once the page
+    changes.
+    """
+    import time
+    driver = webdriver.Firefox()
+    driver.get('https://www.wunderground.com/history')
+    time.sleep(5)
+    driver.execute_script('''
+    window.stop();
+    document.getElementById("histSearch").value = "Atlanta, GA";
+    var tags = document.getElementsByTagName("input");
+    for(var i=0; i<tags.length; i++) {
+      if(tags[i].value == "Submit") {
+        tags[i].click();
+      }
+    }''')
+    time.sleep(5)
+    url = driver.current_url
+    driver.quit()
+    return url
 
 
 def scrape_weather_data(url):
@@ -35,18 +57,22 @@ def scrape_weather_data(url):
     # Get the html from the page using requests
     response = requests.get(url)
     if response.status_code != 200:
-        return '{"error": "Received %s status code for url: %s"}' % (response.status_code, url)
+        return '{"error": "Received %s status code for url: ' \
+               '%s"}' % (response.status_code, url)
 
-    # Use beautiful soup to navigate the html to the rows in the history table
+    # Use beautiful soup to navigate the html
+    # to the rows in the history table
     page = BeautifulSoup(response.text, "html.parser")
     history_table = page.find('table', id='historyTable')
-    # Handle the case of if we weren't sent to a webpage with the table/id we want
+    # Handle the case of if we weren't sent to a web page
+    # with the table/id we want
     if history_table is None:
         return '{"error": "Received a link which does not contain ' \
                'the data we want.  Link received %s"}' % url
     history_table_rows = history_table.findAll('tr')
 
-    # Parse the data from each row with information we care about, and store it in json format
+    # Parse the data from each row with information we care about,
+    # and store it in json format
     temp_json = '{'
     for row in history_table_rows:
         if 'Mean Temperature' in row.get_text():
@@ -62,14 +88,25 @@ def scrape_weather_data(url):
             cells = row.findAll('td')
             temp_json += cell_to_json('Actual Min Temperature', cells[1])
             temp_json += cell_to_json('Average Min Temperature', cells[2])
-            temp_json += cell_to_json('Record Min Temperature', cells[3], False)
-
+            temp_json += cell_to_json('Record Min Temperature',
+                                      cells[3], False)
     # Finish building the JSON string and return it
     return temp_json+'}'
 
 
 def cell_to_json(key, cell, needs_comma=True):
-    """ Docstring """
+    """ This converts the inputs into a 'line' for the json string being
+     built within scrape_weather_data.
+     inputs:
+     -key: The key to use in the JSON line
+     -cell:  A <td> cell contained with a BeautifulSoup object
+     -needs_comma:  if True, add a comma to the end of the string.
+                    if False, does not add a comma.
+                    *Assumes we need a comma as this is the most common case
+     outputs:
+         A String built specifically to be concatenated with the temp_json
+         string within scrape_weather_data
+     """
     temperature = cell.get_text().strip()
     temperature = temperature.replace('\xa0', '')
     temperature = temperature.replace('\n', ' ')
@@ -77,4 +114,13 @@ def cell_to_json(key, cell, needs_comma=True):
 
 
 if __name__ == '__main__':
-    print(scrape_weather_data('https://www.wunderground.com/history/airport/KFTY/2017/10/11/DailyHistory.html?req_city=Atlanta&req_state=GA&req_statename=Georgia&reqdb.zip=30301&reqdb.magic=1&reqdb.wmo=99999'))
+    # TODO: Create methods to validate input
+    location = input('Location: ')
+    month = input('Month: ')
+    day = input('Day: ')
+    year = input('Year: ')
+    # Get the url for the location from wunderground
+    url = get_url(location)
+    # Modify the url for the correct date and use that to get the data
+    data = scrape_weather_data(url)
+    print(data)
