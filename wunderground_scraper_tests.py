@@ -34,9 +34,10 @@ class TestWundergroundScraper(unittest.TestCase):
          retrieves the page, parses the data, and returns it in a string
          formatted as a JSON object.
          """
-        url = 'https://www.wunderground.com/history/airport/KFTY/2017/10/11/' \
-              'DailyHistory.html?req_city=Atlanta&req_state=GA&req_statename=' \
-              'Georgia&reqdb.zip=30301&reqdb.magic=1&reqdb.wmo=99999'''
+        url = 'https://www.wunderground.com/history/airport/KFTY/' \
+              '2017/10/11/DailyHistory.html?req_city=Atlanta&' \
+              'req_state=GA&req_statename=Georgia&reqdb.zip=30301&' \
+              'reqdb.magic=1&reqdb.wmo=99999'''
         json_answer = wunderground_scraper.scrape_weather_data(url)
         expected_answer = '{"Actual Mean Temperature": "76°F","Average Mean' \
                           ' Temperature": "64°F","Actual Max Temperature": ' \
@@ -59,7 +60,7 @@ class TestWundergroundScraper(unittest.TestCase):
                           'https://www.wunderground.com/a404url"}'
         self.assertEqual(answer, expected_answer)
 
-    def test_scrape_weather_data_no_table(self):
+    def test_scrape_weather_data_wrong(self):
         """ This tests to see if, when provided with a url which does not take
         us to the wunderground history page, the scrape weather data function
         realizes that the data table element we're looking for is not on the
@@ -67,8 +68,9 @@ class TestWundergroundScraper(unittest.TestCase):
         """
         url = 'https://www.google.com'
         answer = wunderground_scraper.scrape_weather_data(url)
-        expected_answer = '{"error": "Received a link which does not contain ' \
-                          'the data we want.  Link received %s"}' % url
+        expected_answer = '{"error": "Received a link which does not ' \
+                          'contain the data we want.  ' \
+                          'Link received %s"}' % url
         self.assertEqual(answer, expected_answer)
 
 
