@@ -58,6 +58,34 @@ class TestWundergroundScraper(unittest.TestCase):
         answer = wunderground_scraper.validate_month('123')
         self.assertEqual(answer, False)
 
+    def test_validate_day(self):
+        """ Makes sure a valid day and valid month are returned true by
+        the validate_day method.
+        """
+        answer = wunderground_scraper.validate_day('3', '3')
+        self.assertEqual(answer, True)
+
+    def test_validate_day_feb(self):
+        """ Makes sure when the month is feb, if day is over 29 the day
+        is not valid.
+        """
+        answer = wunderground_scraper.validate_day('30', '2')
+        self.assertEqual(answer, False)
+
+    def test_validate_day_30(self):
+        """ Makes sure a month with only 30 days doesn't show as valid
+        if the user provided 31 as the day of the month.
+        """
+        answer = wunderground_scraper.validate_day('31', '9')
+        self.assertEqual(answer, False)
+
+    def test_validate_day_31(self):
+        """ Makes sure a month with 31 days doesn't show anything higher
+        as being a valid date.
+        """
+        answer = wunderground_scraper.validate_day('32', '5')
+        self.assertEqual(answer, False)
+
     def test_get_url(self):
         """ This tests the get_url method within wunderground_scraper.py
         to ensure that, when given valid inputs, it constructs the url that

@@ -36,6 +36,37 @@ def validate_month(month_string):
     return re.search(regex, month_string) is not None
 
 
+def validate_day(day_string, month_string):
+    """ Validates that the user provided day_string is a valid option.
+    Ensures day_string is the correct number of digits
+    Ensures that day_string is in the correct range depending on the month
+    NOTE:  Leap year validation is handled in the validate_year function.
+
+    :param day_string: A user inputted day_string to validate
+    :param month_string: A validated month string
+    :return: True if valid, False if invalid
+    """
+    regex = r'^\d{1,2}$'
+    # Make sure it's a valid number of digits (one or two)
+    if re.search(regex, day_string):
+        day_num = int(day_string)
+        # Make sure it's at least the first of a month
+        if day_num < 1:
+            return False
+        # Feb only has 28-29 days.
+        # Validates if 29 is valid (on leap years) in year validation
+        if month_string in ['2'] and day_num > 29:
+            return False
+        # Validate months with only 30 days
+        elif month_string in ['4', '6', '9', '11'] and day_num > 30:
+            return False
+        # Validate other months with 31 days
+        elif day_num > 31:
+            return False
+        return True
+    return False
+
+
 def get_url(search_location, search_day, search_month, search_year):
     """ Takes in variables to create a valid url which, when a get request
     is sent to that url, redirects us to the results page the user is
