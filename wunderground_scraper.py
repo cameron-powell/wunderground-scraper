@@ -19,8 +19,21 @@ NOTE: This assumes you are running within an activated virtual environment
 and have the project's requirements already installed.  See the project README
 for instructions on setting that up.
 """
+import re
 import requests
 from bs4 import BeautifulSoup
+
+
+def validate_month(month_string):
+    """ Takes in a month string provided by the user and, using a regex,
+    validates that this is a valid month string.
+    Months should be numeric between 1 and 12
+
+    :param month_string:
+    :return boolean: True if is valid month, False otherwise
+    """
+    regex = r'^[1-9][0-2]{,1}$'
+    return re.search(regex, month_string) is not None
 
 
 def get_url(search_location, search_day, search_month, search_year):

@@ -22,6 +22,42 @@ class TestWundergroundScraper(unittest.TestCase):
     wunderground_scraper.py module.
     """
 
+    def test_validate_month(self):
+        """ Checks a random middle value to verify validate_month is
+        still returning true for a valid input.
+        """
+        answer = wunderground_scraper.validate_month('6')
+        self.assertEqual(answer, True)
+
+    def test_validate_month_two_digit(self):
+        """ Checks to make sure a valid two digit month is valid with the
+        validate month method.
+        """
+        answer = wunderground_scraper.validate_month('10')
+        self.assertEqual(answer, True)
+
+    def test_validate_month_low(self):
+        """ Tests to make sure that values too low don't return true
+        in the validate month function
+        """
+        answer = wunderground_scraper.validate_month('0')
+        self.assertEquals(answer, False)
+
+    def test_validate_month_high(self):
+        """ Tests to make sure month is a string numerically representing a
+         month within the range 1 - 12.  Makes sure numbers too high return false.
+        """
+        answer = wunderground_scraper.validate_month('13')
+        expected_answer = False
+        self.assertEqual(answer, expected_answer)
+
+    def test_validate_month_long(self):
+        """ Tests to make sure month string isn't too long.
+        Should be one or two digits.
+        """
+        answer = wunderground_scraper.validate_month('123')
+        self.assertEqual(answer, False)
+
     def test_get_url(self):
         """ This tests the get_url method within wunderground_scraper.py
         to ensure that, when given valid inputs, it constructs the url that
