@@ -24,14 +24,15 @@ class TestWundergroundScraper(unittest.TestCase):
 
     def test_get_url(self):
         """ This tests the get_url method within wunderground_scraper.py
-        to ensure that, when given a valid location, it's able to retrieve
-        the correct url for that location.
+        to ensure that, when given valid inputs, it constructs the url that
+        the page uses to redirect to the results page.
         """
-        answer = wunderground_scraper.get_url('Atlanta, GA')
-        expected = 'https://www.wunderground.com/history/airport/KFTY' \
-                   '/2017/10/12/DailyHistory.html?' \
-                   'req_city=Atlanta&req_state=GA&req_statename=Georgia' \
-                   '&reqdb.zip=30301&reqdb.magic=1&reqdb.wmo=99999'
+        answer = wunderground_scraper.get_url('Atlanta,+GA', '12', '10', '2017')
+        expected = 'https://www.wunderground.com/cgi-bin/findweather/' \
+                   'getForecast?airportorwmo=query&historytype=DailyHistory&' \
+                   'backurl=/history/index.html&code=Atlanta,+GA&' \
+                   'month=10&day=12&year=2017'
+        self.maxDiff = None
         self.assertEqual(answer, expected)
 
     def test_scrape_weather_data(self):

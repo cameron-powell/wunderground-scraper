@@ -21,55 +21,45 @@ NOTE: This assumes you are running within an activated virtual environment
 and have the project's requirements already installed.  See the project README
 for instructions on setting that up.
 """
-import time
 import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
 
 
-def get_url(search_location):
-    """ This method takes in a location string and, using selenium, opens
-    a Firefox browser, executes javascript to insert the location
-    provided into the search box at https://www.wunderground.com/history,
-    clicks the search button, and returns the url once the page
-    changes.
-    input: location (string)
-    output: history url (string) for that location
+def get_url(search_location, search_day, search_month, search_year):
+    """ Takes in variables to create a valid url which, when a get request
+    is sent to that url, redirects us to the results page the user is
+    looking for.
+
+    :param search_location: formatted string containing the location the
+    user wants temperature data for.
+    :param search_day: validated string for day that exists
+    :param search_month: validated string for month which exists
+    :param search_year: validated string for year which exists
+    :return formatted_url:  A url to be used in a get request which will
+    point us to the results page for the data provided
     """
-    # Create a driver and go to wunderground's history page
-    driver = webdriver.Firefox()
-    driver.get('https://www.wunderground.com/history')
-    time.sleep(5)
-
-    # Inject JS to attempt to stop the page from loading (ads)
-    # Set the histSearch element to the location value provided
-    # Loop through the input tags to find the Submit button
-    driver.execute_script('''
-    window.stop();
-    document.getElementById("histSearch").value = "%s";
-    var tags = document.getElementsByTagName("input");
-    for(var i=0; i<tags.length; i++) {
-      if(tags[i].value == "Submit") {
-        tags[i].click();
-      }
-    }''' % search_location)
-    time.sleep(5)
-
-    # Get the results page URL from the browser then quit the browser
-    url = driver.current_url
-    driver.quit()
-    return url
+    formatted_url = 'https://www.wunderground.com/cgi-bin/findweather/' \
+                    'getForecast?airportorwmo=query&historytype=DailyHistory&backurl=/history/index.html&' \
+                    'code=%s&month=%s&day=%s&year=%s' \
+                    % (search_location, search_month, search_day, search_year)
+    return formatted_url
 
 
 def scrape_weather_data(results_url):
-    """ This method takes in a url pointing to the results page for the
-     users search, grabs the html, parses it to get the data of interest,
-     and returns it as a string formatted as a JSON object.
-     Inputs: results_url -> string url pointing to the results page
-     Outputs: temp_json -> a string of all the temperature data formatted
-         as a json object.
-     """
-    # Get the html from the page using requests
+    """ Takes in a 'results_url' which, when a get request is performed on
+    that url, redirects to the results page.  Navigates the HTML on that page
+    searching for the weather history table.  Parses the following from the
+    weather history table:
+    -Actual Mean Temp, Average Mean Temp
+    -Actual Max Temp, Average Max Temp, Record Max Temp
+    -Actual Min Temp, Average Min Temp, Record Min Temp
+    Returns the above data as a string in json format
+
+    :param results_url:
+    :return temp_json: A string containing the temperature data of interest
+    formatted as a json
+    """
+    # Follow the results_url to the results page
     response = requests.get(results_url)
     if response.status_code != 200:
         return '{"error": "Received %s status code for url: ' \
@@ -135,7 +125,7 @@ if __name__ == '__main__':
     day = input('Day: ')
     year = input('Year: ')
     # Get the results url for the location from wunderground
-    res_url = get_url(location)
+    res_url = get_url(location, day, month, year)
     # Modify the url for the correct date and use that to get the data
     data = scrape_weather_data(res_url)
     # Print the JSON formatted string out for the user
