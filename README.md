@@ -18,3 +18,9 @@
 * Activate the virtual environment (see 'Project Setup')
 * Navigate to the project's root directory
 * Execute `python wunderground_scraper.py`
+
+### Running the Tests:
+* Activate the virtual environment (see 'Project Setup')
+* Navigate to the project's root directory
+* Execute `python wunderground_scraper_tests.py`
+* This will execute all the tests in the _wunderground_scraper_tests.py_ file.
