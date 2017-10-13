@@ -23,6 +23,51 @@ class TestWundergroundScraper(unittest.TestCase):
     wunderground_scraper.py module.
     """
 
+    def test_validate_location_city(self):
+        """ Make sure a valid 'city, state' is seen as valid by the
+        validate location function
+        """
+        answer = wunderground_scraper.validate_location('Atlanta, GA')
+        self.assertEqual(answer, True)
+
+    def test_validate_location_city_nospace(self):
+        """ Make sure a whitespace character is required between the comma
+        and the state
+        """
+        answer = wunderground_scraper.validate_location('Atlanta,GA')
+        self.assertEqual(answer, False)
+
+    def test_validate_location_zip(self):
+        """ Makes sure that a valid zipcode is viewed as valid
+        """
+        answer = wunderground_scraper.validate_location('40065')
+        self.assertEqual(answer, True)
+
+    def test_validate_location_zip_alpha(self):
+        """ Make sure that if alphabet characters are in the zip it isn't
+        seen as valid
+        """
+        answer = wunderground_scraper.validate_location('4OO65')
+        self.assertEqual(answer, False)
+
+    def test_validate_location_air(self):
+        """ Checks to make sure a valid airport code is validated as true
+        """
+        answer = wunderground_scraper.validate_location('PARL')
+        self.assertEqual(answer, True)
+
+    def test_validate_location_air_lower(self):
+        """ Makes sure only caps airport codes are allowed
+        """
+        answer = wunderground_scraper.validate_location('parl')
+        self.assertEqual(answer, False)
+
+    def test_validate_location_air_num(self):
+        """ Make sure numbers aren't allowed in the airport codes
+        """
+        answer = wunderground_scraper.validate_location('PAR1')
+        self.assertEqual(answer, False)
+
     def test_validate_month(self):
         """ Checks a random middle value to verify validate_month is
         still returning true for a valid input.

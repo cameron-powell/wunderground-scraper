@@ -27,6 +27,35 @@ import sys
 from bs4 import BeautifulSoup
 
 
+def validate_location(location_string):
+    """ Make sure that the location string passed in by the user is strictly
+    formatted one of the following:
+    -A 'City, State' (capitalization doesn't matter, whitespace does)
+    -A 5 digit zipcode
+    -A 4 character (all caps) airport code
+    Validated using regular expressions tailored for each.
+
+    :param location_string: User inputted string containing the location
+    to be validated
+    :return valid: True if location_string is valid, False if invalid
+    """
+    valid = False
+    # Setup regular expressions for each case
+    city_state_regex = r'^[a-zA-Z]+,\s[a-zA-Z]+$'
+    zipcode_regex = r'^\d\d\d\d\d$'
+    airport_regex = r'^[A-Z][A-Z][A-Z][A-Z]$'
+    # Check if 'city, state'
+    if re.search(city_state_regex, location_string):
+        valid = True
+    # Check if zipcode
+    elif re.search(zipcode_regex, location_string):
+        valid = True
+    # Check if airport code
+    elif re.search(airport_regex, location_string):
+        valid = True
+    return valid
+
+
 def validate_month(month_string):
     """ Takes in a month string provided by the user and, using a regex,
     validates that this is a valid month string.
@@ -118,7 +147,8 @@ def get_inputs():
     """
     # Get and validate location
     location_string = input('Location: ')
-    # TODO: Format and validate location string
+    if not validate_location(location_string):
+        print('{"error": "Location invalid"}')
     # Get and validate month
     month_string = input('Month: ')
     if not validate_month(month_string):
@@ -236,6 +266,6 @@ if __name__ == '__main__':
     # Get the results url for the location from wunderground
     res_url = get_url(location, day, month, year)
     # Navigate to the res_url's destination and retrieve the data
-    data = scrape_weather_data(res_url)
+    json_data = scrape_weather_data(res_url)
     # Print the JSON formatted string out for the user
-    print(data)
+    print(json_data)
