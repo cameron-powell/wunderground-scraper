@@ -170,8 +170,11 @@ class TestWundergroundScraper(unittest.TestCase):
         """ This tests the get_url method within wunderground_scraper.py
         to ensure that, when given valid inputs, it constructs the url that
         the page uses to redirect to the results page.
+
+        Also ensures that 'city, state' location strings are
+        transformed into 'city,+state' strings
         """
-        answer = wunderground_scraper.get_url('Atlanta,+GA', '12', '10', '2017')
+        answer = wunderground_scraper.get_url('Atlanta, GA', '12', '10', '2017')
         expected = 'https://www.wunderground.com/cgi-bin/findweather/' \
                    'getForecast?airportorwmo=query&historytype=DailyHistory&' \
                    'backurl=/history/index.html&code=Atlanta,+GA&' \

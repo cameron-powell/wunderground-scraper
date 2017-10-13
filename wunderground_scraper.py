@@ -181,6 +181,10 @@ def get_url(search_location, search_day, search_month, search_year):
     :return formatted_url:  A url to be used in a get request which will
     point us to the results page for the data provided
     """
+    # Format 'city, state' locations to 'city,+state' by replacing
+    # space characters with '+' character
+    search_location = search_location.replace(' ', '+')
+    # Inject data into the pre-made url
     formatted_url = 'https://www.wunderground.com/cgi-bin/findweather/' \
                     'getForecast?airportorwmo=query&historytype=DailyHistory&backurl=/history/index.html&' \
                     'code=%s&month=%s&day=%s&year=%s' \
