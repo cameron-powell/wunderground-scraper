@@ -5,7 +5,7 @@ The purpose of this module is to:
 2) Provide methods for scraping requested values off of the wunderground
 results page
 3) Print the requested data back to the user in JSON format
-4) Provide an entrypoint to the program to execute all this functionality
+4) Provide an entry point to the program to execute all this functionality
 
 This module can be run by navigating to the root project directory and running
 the following command:
@@ -41,7 +41,7 @@ def validate_location(location_string):
     """
     valid = False
     # Setup regular expressions for each case
-    city_state_regex = r'^[a-zA-Z]+,\s[a-zA-Z]+$'
+    city_state_regex = r'^[a-zA-Z]+\s?[a-zA-Z]*,\s[a-zA-Z]+$'
     zipcode_regex = r'^\d\d\d\d\d$'
     airport_regex = r'^[A-Z][A-Z][A-Z][A-Z]$'
     # Check if 'city, state'

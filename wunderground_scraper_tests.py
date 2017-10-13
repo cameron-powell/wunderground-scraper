@@ -37,6 +37,13 @@ class TestWundergroundScraper(unittest.TestCase):
         answer = wunderground_scraper.validate_location('Atlanta,GA')
         self.assertEqual(answer, False)
 
+    def test_validate_location_city_multiword(self):
+        """ Make sure multiword city names, like Los Angeles, aren't seen
+        as being invalid by the validate_location method.
+        """
+        answer = wunderground_scraper.validate_location('Los Angeles, California')
+        self.assertEqual(answer, True)
+
     def test_validate_location_zip(self):
         """ Makes sure that a valid zipcode is viewed as valid
         """
