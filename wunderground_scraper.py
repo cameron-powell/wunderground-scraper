@@ -149,6 +149,7 @@ def get_inputs():
     location_string = input('Location: ')
     if not validate_location(location_string):
         print('{"error": "Location invalid"}')
+        sys.exit()
     # Get and validate month
     month_string = input('Month: ')
     if not validate_month(month_string):
