@@ -135,6 +135,7 @@ def validate_year(year_string, month_string, day_string):
 
 def get_inputs():
     """ This method gets, validates, and returns user inputs.
+    Prints required input formats for the user.
     Retrieves and validates:
     location, month, day, year
     Also formats the location to be what the redirect url will expect.
@@ -145,6 +146,16 @@ def get_inputs():
     :return day_string: Validated string containing the day
     :return year_string: Validated string containing the year
     """
+    # Print input format restrictions to the user
+    print('Input Format Restrictions:')
+    print('Location: "City, State" (caps optional, no quotes)')
+    print('\t5 Digit Zipcode')
+    print('\t4 Alphabet Character Airport Code')
+    print('Month:\t1-12')
+    print('Day:\t1-31 (or fewer depending on the month)')
+    print('Year:\t4 Digit Year')
+    print('\tMust be today or in the past')
+    print('\tChecks if month and day are valid with leap year')
     # Get and validate location
     location_string = input('Location: ')
     if not validate_location(location_string):
