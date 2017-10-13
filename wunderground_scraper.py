@@ -19,6 +19,8 @@ NOTE: This assumes you are running within an activated virtual environment
 and have the project's requirements already installed.  See the project README
 for instructions on setting that up.
 """
+import calendar
+import datetime
 import re
 import requests
 from bs4 import BeautifulSoup
@@ -63,6 +65,40 @@ def validate_day(day_string, month_string):
         # Validate other months with 31 days
         elif day_num > 31:
             return False
+        return True
+    return False
+
+
+def validate_year(year_string, month_string, day_string):
+    """ Takes in a user inputted year, and validated month/day strings.
+    Makes sure that the year is
+    1) A Valid 4 digit year
+    2) A valid year if the user claimed this is a leap year
+        (by providing 2 (feb) as the month and 29 as the day)
+    Returns true if is a valid year, false if it is not a valid year.
+
+    :param year_string: User inputted string containing year to validate
+    :param month_string: Validated numeric month as a string
+    :param day_string: Validated numeric day as a string
+    :return: True if year is valid, False if year is not valid
+    """
+    # Make sure year has 4 digits
+    regex = r'^\d\d\d\d$'
+    if re.search(regex, year_string):
+        # Make sure feb 29 isn't valid unless leap year
+        year_num = int(year_string)
+        day_num = int(day_string)
+        if not calendar.isleap(year_num):
+            if month_string == '2':  # February
+                if day_num > 28:
+                    return False
+
+        # Make sure it doesn't occur in the future
+        now = datetime.datetime.now()
+        users_date = datetime.datetime(year=year_num, month=int(month_string), day=day_num)
+        if now < users_date:
+            return False
+        # Passed tests and is valid
         return True
     return False
 

@@ -12,6 +12,7 @@ NOTE:  This assumes you are running within an activated virtual environment
 and have the project's requirements already installed.  See the project README
 for instructions on setting that up.
 """
+import datetime
 import unittest
 import wunderground_scraper
 from bs4 import BeautifulSoup
@@ -41,7 +42,7 @@ class TestWundergroundScraper(unittest.TestCase):
         in the validate month function
         """
         answer = wunderground_scraper.validate_month('0')
-        self.assertEquals(answer, False)
+        self.assertEqual(answer, False)
 
     def test_validate_month_high(self):
         """ Tests to make sure month is a string numerically representing a
@@ -84,6 +85,40 @@ class TestWundergroundScraper(unittest.TestCase):
         as being a valid date.
         """
         answer = wunderground_scraper.validate_day('32', '5')
+        self.assertEqual(answer, False)
+
+    def test_validate_year(self):
+        """ Make sure that a valid Year/Month/Day returns true.
+        """
+        answer = wunderground_scraper.validate_year('2016', '2', '29')
+        self.assertEqual(answer, True)
+
+    def test_validate_year_leap(self):
+        """ Make sure that if it isn't a leap year, returns false
+        if date is feb 29th.
+        """
+        answer = wunderground_scraper.validate_year('2015', '2', '29')
+        self.assertEqual(answer, False)
+
+    def test_validate_year_long(self):
+        """ Make sure years with more than 4 digits aren't valid.
+        """
+        answer = wunderground_scraper.validate_year('20155', '3', '28')
+        self.assertEqual(answer, False)
+
+    def test_validate_year_short(self):
+        """ Make sure years with less than 4 digits aren't valid.
+        """
+        answer = wunderground_scraper.validate_year('201', '4', '8')
+        self.assertEqual(answer, False)
+
+    def test_validate_year_happened(self):
+        """ Make sure dates in the future are invalid.
+        """
+        tomorrow = datetime.datetime.now() + datetime.timedelta(days=1)
+        answer = wunderground_scraper.validate_year(str(tomorrow.year),
+                                                    str(tomorrow.month),
+                                                    str(tomorrow.day))
         self.assertEqual(answer, False)
 
     def test_get_url(self):
