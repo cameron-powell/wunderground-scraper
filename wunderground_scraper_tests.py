@@ -193,12 +193,14 @@ class TestWundergroundScraper(unittest.TestCase):
               'req_state=GA&req_statename=Georgia&reqdb.zip=30301&' \
               'reqdb.magic=1&reqdb.wmo=99999'''
         json_answer = wunderground_scraper.scrape_weather_data(url)
-        expected_answer = '{"Actual Mean Temperature": "76°F","Average Mean' \
-                          ' Temperature": "64°F","Actual Max Temperature": ' \
-                          '"86°F","Average Max Temperature": "75°F","Record ' \
-                          'Max Temperature": "104°F (1999)","Actual Min ' \
-                          'Temperature": "66°F","Average Min Temperature": ' \
-                          '"53°F","Record Min Temperature": "32°F (2000)"}'
+        expected_answer = '{"Actual Max Temperature": "86F", ' \
+                          '"Actual Mean Temperature": "76F", ' \
+                          '"Actual Min Temperature": "66F", ' \
+                          '"Average Max Temperature": "75F", ' \
+                          '"Average Mean Temperature": "64F", ' \
+                          '"Average Min Temperature": "53F", ' \
+                          '"Record Max Temperature": "104F (1999)", ' \
+                          '"Record Min Temperature": "32F (2000)"}'
         self.assertEqual(json_answer, expected_answer)
 
     def test_scrape_weather_data_404(self):
@@ -227,10 +229,10 @@ class TestWundergroundScraper(unittest.TestCase):
                           'Link received %s"}' % url
         self.assertEqual(answer, expected_answer)
 
-    def test_cell_to_json(self):
-        """ This function tests the cell to json function.  It creates a fake
-        table row to get cells from, and parses a cell into the format string
-        we expect.
+    def test_get_cell_data(self):
+        """ Tests to make sure that get_cell_data, when provided with a cell
+        containing a table row with data cells, it parses out the temperature
+        value and returns it formatted correctly.
         """
         row_html = '''<tr>
         <td class="indent"><span>Mean Temperature</span></td>
@@ -245,31 +247,8 @@ class TestWundergroundScraper(unittest.TestCase):
         '''
         row = BeautifulSoup(row_html, 'html.parser')
         cells = row.findAll('td')
-        answer = wunderground_scraper\
-            .cell_to_json('Actual Mean Temperature', cells[1], False)
-        expected = '"Actual Mean Temperature": "76°F"'
-        self.assertEqual(answer, expected)
-
-    def test_cell_to_json_comma(self):
-        """ This tests to make sure that cell_to_json is appending a comma
-        to the end of our json element string when requested. """
-        row_html = '''<tr>
-        <td class="indent"><span>Mean Temperature</span></td>
-        <td>
-        <span class="wx-data"><span class="wx-value">76</span><span class="wx-unit"> °F</span></span>
-        </td>
-        <td>
-        <span class="wx-data"><span class="wx-value">64</span><span class="wx-unit"> °F</span></span>
-        </td>
-        <td> </td>
-        </tr>
-        '''
-        row = BeautifulSoup(row_html, 'html.parser')
-        cells = row.findAll('td')
-        answer = wunderground_scraper\
-            .cell_to_json('Actual Mean Temperature', cells[1])
-        expected = '"Actual Mean Temperature": "76°F",'
-        self.assertEqual(answer, expected)
+        answer = wunderground_scraper.get_cell_data(cells[1])
+        self.assertEqual(answer, '76F')
 
 
 if __name__ == '__main__':

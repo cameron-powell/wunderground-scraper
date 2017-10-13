@@ -21,6 +21,7 @@ for instructions on setting that up.
 """
 import calendar
 import datetime
+import json
 import re
 import requests
 import sys
@@ -211,10 +212,11 @@ def scrape_weather_data(results_url):
     -Actual Mean Temp, Average Mean Temp
     -Actual Max Temp, Average Max Temp, Record Max Temp
     -Actual Min Temp, Average Min Temp, Record Min Temp
-    Returns the above data as a string in json format
+    Returns the above data as a string in json format, with keys sorted
 
-    :param results_url:
-    :return temp_json: A string containing the temperature data of interest
+    :param results_url: A url which will redirect to the results page
+    for the data the user provided
+    :return: A string containing the temperature data of interest
     formatted as a json
     """
     # Follow the results_url to the results page
@@ -246,45 +248,39 @@ def scrape_weather_data(results_url):
     history_table_rows = history_table.findAll('tr')
 
     # Parse the data from each row with information we care about,
-    # and store it in json format
-    temp_json = '{'
+    # and store it in a dictionary
+    temperature_dict = dict()
     for row in history_table_rows:
         if 'Mean Temperature' in row.get_text():
             cells = row.findAll('td')
-            temp_json += cell_to_json('Actual Mean Temperature', cells[1])
-            temp_json += cell_to_json('Average Mean Temperature', cells[2])
+            temperature_dict['Actual Mean Temperature'] = get_cell_data(cells[1])
+            temperature_dict['Average Mean Temperature'] = get_cell_data(cells[2])
         elif 'Max Temperature' in row.get_text():
             cells = row.findAll('td')
-            temp_json += cell_to_json('Actual Max Temperature', cells[1])
-            temp_json += cell_to_json('Average Max Temperature', cells[2])
-            temp_json += cell_to_json('Record Max Temperature', cells[3])
+            temperature_dict['Actual Max Temperature'] = get_cell_data(cells[1])
+            temperature_dict['Average Max Temperature'] = get_cell_data(cells[2])
+            temperature_dict['Record Max Temperature'] = get_cell_data(cells[3])
         elif 'Min Temperature' in row.get_text():
             cells = row.findAll('td')
-            temp_json += cell_to_json('Actual Min Temperature', cells[1])
-            temp_json += cell_to_json('Average Min Temperature', cells[2])
-            temp_json += cell_to_json('Record Min Temperature',
-                                      cells[3], False)
-    # Finish building the JSON string and return it
-    return temp_json+'}'
+            temperature_dict['Actual Min Temperature'] = get_cell_data(cells[1])
+            temperature_dict['Average Min Temperature'] = get_cell_data(cells[2])
+            temperature_dict['Record Min Temperature'] = get_cell_data(cells[3])
+    # Convert the temperature_dict to a json string and return it
+    return json.dumps(temperature_dict, sort_keys=True)
 
 
-def cell_to_json(key, cell, needs_comma=True):
-    """ This converts the inputs into a 'line' for the json string being
-     built within scrape_weather_data.
-     inputs:
-     -key: The key to use in the JSON line
-     -cell:  A <td> cell contained with a BeautifulSoup object
-     -needs_comma:  if True, add a comma to the end of the string.
-                    if False, does not add a comma.
-                    *Assumes we need a comma as this is the most common case
-     outputs:
-         A String built specifically to be concatenated with the temp_json
-         string within scrape_weather_data
-     """
+def get_cell_data(cell):
+    """ Receives a cell containing temperature data to be parsed out,
+    formatted, and returned.
+
+    :param cell: A cell from the table containing temperature data
+    :return temperature: String with the formatted temperature value
+    """
     temperature = cell.get_text().strip()
     temperature = temperature.replace('\xa0', '')
     temperature = temperature.replace('\n', ' ')
-    return '"%s": "%s"%s' % (key, temperature, ',' if needs_comma else '')
+    temperature = temperature.replace('°', '')
+    return temperature
 
 
 if __name__ == '__main__':
