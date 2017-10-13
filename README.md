@@ -1,5 +1,20 @@
 # Wunderground Scraper
 
+### Description:
+The purpose of this project is to scrape weather data from [wunderground's history] results page.  The script gets the
+desired location and date from the user and uses that to find the correct wunderground history page and parses the
+following from it:
+* Actual Mean Temp
+* Average Mean Temp
+* Actual Max Temp
+* Average Max Temp
+* Record Max Temp
+* Actual Min Temp
+* Average Min Temp
+* Record Min Temp
+
+These values are printed back to the user in the terminal in json format, sorted by key.
+
 ### Tested With:
 * Python 3.5.2
 * pip 8.1.1 (python 3.5)
