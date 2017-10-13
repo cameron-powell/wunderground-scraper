@@ -247,26 +247,62 @@ def scrape_weather_data(results_url):
                'the data we want.  Link received %s"}' % results_url
     history_table_rows = history_table.findAll('tr')
 
+    # Check to make sure the table has all the headers we require
+    if not table_is_complete(history_table_rows):
+        return '{"error": "Table does not have all required headers"}'
+
     # Parse the data from each row with information we care about,
     # and store it in a dictionary
     temperature_dict = dict()
     for row in history_table_rows:
-        if 'Mean Temperature' in row.get_text():
+        row_text = row.get_text()
+        if 'Mean Temperature' in row_text:
             cells = row.findAll('td')
             temperature_dict['Actual Mean Temperature'] = get_cell_data(cells[1])
             temperature_dict['Average Mean Temperature'] = get_cell_data(cells[2])
-        elif 'Max Temperature' in row.get_text():
+        elif 'Max Temperature' in row_text:
             cells = row.findAll('td')
             temperature_dict['Actual Max Temperature'] = get_cell_data(cells[1])
             temperature_dict['Average Max Temperature'] = get_cell_data(cells[2])
             temperature_dict['Record Max Temperature'] = get_cell_data(cells[3])
-        elif 'Min Temperature' in row.get_text():
+        elif 'Min Temperature' in row_text:
             cells = row.findAll('td')
             temperature_dict['Actual Min Temperature'] = get_cell_data(cells[1])
             temperature_dict['Average Min Temperature'] = get_cell_data(cells[2])
             temperature_dict['Record Min Temperature'] = get_cell_data(cells[3])
     # Convert the temperature_dict to a json string and return it
     return json.dumps(temperature_dict, sort_keys=True)
+
+
+def table_is_complete(table_rows):
+    """ Helper function for scrape_weather_data.
+    Takes in a soup object containing table rows.
+    Scans the rows searching for keywords indicating that
+    table headers we require are in the table to move
+    forward.
+
+    :param table_rows: Soup object containing table rows
+    :return: True if table has all the headers we expect,
+             False if table is missing expected headers
+    """
+    # Create boolean flags for each header
+    actual_header = False
+    average_header = False
+    record_header = False
+    # Scan the rows looking for keywords
+    # Set the respective flag if the keyword is found
+    for row in table_rows:
+        row_text = row.get_text()
+        if 'Actual' in row_text:
+            actual_header = True
+        if 'Average' in row_text:
+            average_header = True
+        if 'Record' in row_text:
+            record_header = True
+    # Return true if we found all the headers
+    if actual_header and average_header and record_header:
+        return True
+    return False
 
 
 def get_cell_data(cell):

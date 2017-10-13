@@ -229,6 +229,29 @@ class TestWundergroundScraper(unittest.TestCase):
                           'Link received %s"}' % url
         self.assertEqual(answer, expected_answer)
 
+    def test_table_is_complete(self):
+        """ Tests to make sure that when passed a complete table
+        the table_is_complete method returns true.
+        """
+        html = '<tr><th>Actual</th></tr>' \
+               '<tr><th>Average</th></tr>' \
+               '<tr><th>Record</th></tr>'
+        page = BeautifulSoup(html, 'html.parser')
+        rows = page.findAll('tr')
+        answer = wunderground_scraper.table_is_complete(rows)
+        self.assertEqual(answer, True)
+
+    def test_table_is_complete_missing(self):
+        """ Tests to make sure that when passed an incomplete table
+        the table_is_complete method returns false.
+        """
+        html = '<tr><th>Actual</th></tr>' \
+               '<tr><th>Record</th></tr>'
+        page = BeautifulSoup(html, 'html.parser')
+        rows = page.findAll('tr')
+        answer = wunderground_scraper.table_is_complete(rows)
+        self.assertEqual(answer, False)
+
     def test_get_cell_data(self):
         """ Tests to make sure that get_cell_data, when provided with a cell
         containing a table row with data cells, it parses out the temperature
