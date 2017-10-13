@@ -13,3 +13,8 @@
 4) (linux/macOS) Activate the virtual environment with `source ws-venv/bin/activate`
 5) (Windows) Activate the virtual environment by running the activate.bat file in the ws-venv's bin folder
 6) Install requirements with `pip install -r requirements.txt`
+
+### Running the Project:
+* Activate the virtual environment (see 'Project Setup')
+* Navigate to the project's root directory
+* Execute `python wunderground_scraper.py`
