@@ -4,8 +4,8 @@ The purpose of this module is to:
 1) Provide methods to get location and date inputs from the user
 2) Provide methods for scraping requested values off of the wunderground
 results page
-4) Print the requested data back to the user in JSON format
-5) Provide an entrypoint to the program to execute all this functionality
+3) Print the requested data back to the user in JSON format
+4) Provide an entrypoint to the program to execute all this functionality
 
 This module can be run by navigating to the root project directory and running
 the following command:
