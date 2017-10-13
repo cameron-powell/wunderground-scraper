@@ -23,6 +23,7 @@ import calendar
 import datetime
 import re
 import requests
+import sys
 from bs4 import BeautifulSoup
 
 
@@ -101,6 +102,39 @@ def validate_year(year_string, month_string, day_string):
         # Passed tests and is valid
         return True
     return False
+
+
+def get_inputs():
+    """ This method gets, validates, and returns user inputs.
+    Retrieves and validates:
+    location, month, day, year
+    Also formats the location to be what the redirect url will expect.
+    Returns validated strings for each.
+
+    :return location_string: Validated string containing the location
+    :return month_string: Validated string containing the month
+    :return day_string: Validated string containing the day
+    :return year_string: Validated string containing the year
+    """
+    # Get and validate location
+    location_string = input('Location: ')
+    # TODO: Format and validate location string
+    # Get and validate month
+    month_string = input('Month: ')
+    if not validate_month(month_string):
+        print('{"error": "Month invalid"}')
+        sys.exit()
+    # Get and validate day
+    day_string = input('Day: ')
+    if not validate_day(day_string, month_string):
+        print('{"error": "Day invalid"}')
+        sys.exit()
+    # Get and validate year
+    year_string = input('Year: ')
+    if not validate_year(year_string, month_string, day_string):
+        print('{"error": "Year invalid"}')
+        sys.exit()
+    return location_string, month_string, day_string, year_string
 
 
 def get_url(search_location, search_day, search_month, search_year):
@@ -197,14 +231,11 @@ def cell_to_json(key, cell, needs_comma=True):
 
 
 if __name__ == '__main__':
-    # TODO: Create methods to validate input
-    location = input('Location: ')
-    month = input('Month: ')
-    day = input('Day: ')
-    year = input('Year: ')
+    # Get inputs from the user
+    location, month, day, year = get_inputs()
     # Get the results url for the location from wunderground
     res_url = get_url(location, day, month, year)
-    # Modify the url for the correct date and use that to get the data
+    # Navigate to the res_url's destination and retrieve the data
     data = scrape_weather_data(res_url)
     # Print the JSON formatted string out for the user
     print(data)
