@@ -202,7 +202,18 @@ def scrape_weather_data(results_url):
     formatted as a json
     """
     # Follow the results_url to the results page
-    response = requests.get(results_url)
+    response = None
+    try:
+        response = requests.get(results_url, timeout=3)
+    except requests.Timeout as te:
+        print('{"error": "Request timed out"}')
+        sys.exit()
+    except requests.TooManyRedirects as tre:
+        print('{"error": "Request raised too many redirects"}')
+        sys.exit()
+    except requests.RequestException as ree:
+        print('{"error": "Request raised an exception"}')
+        sys.exit()
     if response.status_code != 200:
         return '{"error": "Received %s status code for url: ' \
                '%s"}' % (response.status_code, results_url)
